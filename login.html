@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h2>User Login</h2>
+
+        <form id="loginForm">
+
+            <input type="text" name="user" placeholder="Username or Email" required>
+
+            <input type="password" name="password" placeholder="Password" required>
+
+            <button type="submit" name="login">Login</button>
+
+        </form>
+
+        <p>Don't have an account? <a href="register.html">Register here</a></p>
+
+        <div id="message-container"></div>
+
+    </div>
+
+    <script>
+        // Check for URL parameters from previous standard redirects (optional fallback)
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const messageContainer = document.getElementById('message-container');
+        
+        if (error) {
+            messageContainer.innerHTML = `<div class="error-message">${error}</div>`;
+        }
+
+        // AJAX Form Submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent full page reload
+            
+            const formData = new FormData(this);
+            formData.append('login', 'true');
+
+            // Clear previous messages
+            messageContainer.innerHTML = '';
+
+            fetch('login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    messageContainer.innerHTML = `<div class="success-message">${data.message}</div>`;
+                    // Redirect seamlessly
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1000); 
+                } else {
+                    messageContainer.innerHTML = `<div class="error-message">${data.message}</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageContainer.innerHTML = `<div class="error-message">An unexpected error occurred. Please try again.</div>`;
+            });
+        });
+    </script>
+
+</body>
+
+</html>
